@@ -1,124 +1,53 @@
 package swd.project.swdgr3project.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal; // Import BigDecimal
 import java.time.LocalDateTime;
 
-/**
- * Entity class representing an item in an order.
- */
+@Data
+@Entity
+@Table(name = "order_items")
 public class OrderItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
-    private String productName; // Stored at time of order
-    private double price; // Price at time of order
+
+    private String productName;
+
+    // SỬA LỖI: Chuyển sang BigDecimal
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
     private int quantity;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructors
-    public OrderItem() {
-    }
-
-    public OrderItem(Long id, Order order, Product product, String productName, double price, int quantity,
-                    LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.order = order;
-        this.product = product;
-        this.productName = productName;
-        this.price = price;
-        this.quantity = quantity;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-        if (product != null) {
-            this.productName = product.getName();
-            this.price = product.getPrice();
-        }
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     /**
-     * Calculates the subtotal for this order item (price * quantity).
-     * 
-     * @return The subtotal
+     * Calculates the subtotal for this order item.
+     * @return The subtotal as a BigDecimal
      */
-    public double getSubtotal() {
-        return price * quantity;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderItem{" +
-                "id=" + id +
-                ", productName='" + productName + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", subtotal=" + getSubtotal() +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+    public BigDecimal getSubtotal() {
+        if (this.price == null) {
+            return BigDecimal.ZERO;
+        }
+        return this.price.multiply(BigDecimal.valueOf(this.quantity));
     }
 }

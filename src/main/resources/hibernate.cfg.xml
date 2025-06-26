@@ -11,8 +11,13 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
 
         <!-- Entity classes -->
-        <mapping class="swd.project.swdgr3project.model.entity.Cart"/>
         <mapping class="swd.project.swdgr3project.entity.User"/>
+        <mapping class="swd.project.swdgr3project.entity.ProductCategory"/>
+        <mapping class="swd.project.swdgr3project.entity.Product"/>
+        <mapping class="swd.project.swdgr3project.entity.Cart"/>
+        <mapping class="swd.project.swdgr3project.entity.CartItem"/>
+        <mapping class="swd.project.swdgr3project.entity.Order"/>
+        <mapping class="swd.project.swdgr3project.entity.OrderItem"/>
         <!--TODO : add entity class-->
     </session-factory>
 </hibernate-configuration>

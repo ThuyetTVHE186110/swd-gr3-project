@@ -4,7 +4,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import swd.project.swdgr3project.dao.ProductDAO;
-import swd.project.swdgr3project.model.entity.Product;
+import swd.project.swdgr3project.entity.Product;
+import swd.project.swdgr3project.entity.ProductCategory;
 import swd.project.swdgr3project.utils.HibernateUtils;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 /**
  * Implementation of the ProductDAO interface using Hibernate.
+ * This is the final, corrected version.
  */
 public class ProductDAOImpl implements ProductDAO {
 
@@ -21,15 +23,15 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Set creation and update timestamps
+
             LocalDateTime now = LocalDateTime.now();
-            product.setCreatedAt(now);
+            if (product.getCreatedAt() == null) {
+                product.setCreatedAt(now);
+            }
             product.setUpdatedAt(now);
-            
-            // Save the product and get the generated ID
+
             session.persist(product);
-            
+
             transaction.commit();
             return product;
         } catch (Exception e) {
@@ -46,13 +48,11 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Update the timestamp
+
             product.setUpdatedAt(LocalDateTime.now());
-            
-            // Update the product
+
             session.merge(product);
-            
+
             transaction.commit();
             return product;
         } catch (Exception e) {
@@ -99,8 +99,8 @@ public class ProductDAOImpl implements ProductDAO {
     public List<Product> findByCategory(Long categoryId) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             Query<Product> query = session.createQuery(
-                "FROM Product WHERE category.id = :categoryId", 
-                Product.class
+                    "FROM Product WHERE category.id = :categoryId",
+                    Product.class
             );
             query.setParameter("categoryId", categoryId);
             return query.list();
@@ -114,8 +114,8 @@ public class ProductDAOImpl implements ProductDAO {
     public List<Product> findActiveByCategoryId(Long categoryId) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             Query<Product> query = session.createQuery(
-                "FROM Product WHERE category.id = :categoryId AND active = true", 
-                Product.class
+                    "FROM Product WHERE category.id = :categoryId AND active = true",
+                    Product.class
             );
             query.setParameter("categoryId", categoryId);
             return query.list();
@@ -128,10 +128,10 @@ public class ProductDAOImpl implements ProductDAO {
     @Override
     public List<Product> search(String keyword) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            String searchPattern = "%" + keyword + "%";
+            String searchPattern = "%" + keyword.toLowerCase() + "%";
             Query<Product> query = session.createQuery(
-                "FROM Product WHERE name LIKE :pattern OR description LIKE :pattern", 
-                Product.class
+                    "FROM Product WHERE lower(name) LIKE :pattern OR lower(description) LIKE :pattern",
+                    Product.class
             );
             query.setParameter("pattern", searchPattern);
             return query.list();
@@ -146,7 +146,7 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
+
             Product product = session.get(Product.class, id);
             if (product != null) {
                 session.remove(product);
@@ -169,7 +169,7 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
+
             Product product = session.get(Product.class, id);
             if (product != null) {
                 product.setActive(false);
@@ -194,7 +194,7 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
+
             Product product = session.get(Product.class, id);
             if (product != null) {
                 product.setActive(true);
@@ -215,14 +215,13 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public Product.Category saveCategory(Product.Category category) {
+    public ProductCategory saveCategory(ProductCategory category) {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Save the category and get the generated ID
+
             session.persist(category);
-            
+
             transaction.commit();
             return category;
         } catch (Exception e) {
@@ -235,14 +234,13 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public Product.Category updateCategory(Product.Category category) {
+    public ProductCategory updateCategory(ProductCategory category) {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Update the category
+
             session.merge(category);
-            
+
             transaction.commit();
             return category;
         } catch (Exception e) {
@@ -255,9 +253,9 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public Optional<Product.Category> findCategoryById(Long id) {
+    public Optional<ProductCategory> findCategoryById(Long id) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Product.Category category = session.get(Product.Category.class, id);
+            ProductCategory category = session.get(ProductCategory.class, id);
             return Optional.ofNullable(category);
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,9 +264,10 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public List<Product.Category> findAllCategories() {
+    public List<ProductCategory> findAllCategories() {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            return session.createQuery("FROM Product$Category", Product.Category.class).list();
+            // Corrected HQL query
+            return session.createQuery("FROM ProductCategory", ProductCategory.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error finding all categories: " + e.getMessage(), e);
@@ -280,21 +279,21 @@ public class ProductDAOImpl implements ProductDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            Product.Category category = session.get(Product.Category.class, id);
+
+            ProductCategory category = session.get(ProductCategory.class, id);
             if (category != null) {
                 // Check if there are any products in this category
                 Query<Long> query = session.createQuery(
-                    "SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId", 
-                    Long.class
+                        "SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId",
+                        Long.class
                 );
                 query.setParameter("categoryId", id);
                 Long count = query.uniqueResult();
-                
+
                 if (count > 0) {
-                    throw new RuntimeException("Cannot delete category with associated products");
+                    throw new IllegalStateException("Cannot delete category with associated products. Found " + count + " products.");
                 }
-                
+
                 session.remove(category);
                 transaction.commit();
                 return true;
@@ -304,6 +303,10 @@ public class ProductDAOImpl implements ProductDAO {
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
+            }
+            // Re-throw specific exception for better error handling in service layer
+            if (e instanceof IllegalStateException) {
+                throw e;
             }
             e.printStackTrace();
             throw new RuntimeException("Error deleting category: " + e.getMessage(), e);

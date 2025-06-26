@@ -1,110 +1,54 @@
 package swd.project.swdgr3project.entity;
 
+import lombok.Data;
+import jakarta.persistence.*;
+import java.math.BigDecimal; // Import BigDecimal
 import java.time.LocalDateTime;
 
 /**
  * Entity class representing an item in a shopping cart.
+ * FINAL CORRECTED VERSION: Uses BigDecimal for price consistently.
  */
+@Data
+@Entity
+@Table(name = "cart_items")
 public class CartItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Column(nullable = false)
     private int quantity;
-    private double price; // Price at the time of adding to cart
+
+    // SỬA LỖI: Chuyển sang BigDecimal để nhất quán
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructors
-    public CartItem() {
-    }
-
-    public CartItem(Long id, Cart cart, Product product, int quantity, double price, LocalDateTime createdAt,
-                   LocalDateTime updatedAt) {
-        this.id = id;
-        this.cart = cart;
-        this.product = product;
-        this.quantity = quantity;
-        this.price = price;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Cart getCart() {
-        return cart;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    // Lombok sẽ tự động tạo các phương thức:
+    // public BigDecimal getPrice() { ... }
+    // public void setPrice(BigDecimal price) { ... }
 
     /**
      * Calculates the subtotal for this cart item (price * quantity).
-     * 
-     * @return The subtotal
+     * @return The subtotal as a BigDecimal
      */
-    public double getSubtotal() {
-        return price * quantity;
-    }
-
-    @Override
-    public String toString() {
-        return "CartItem{" +
-                "id=" + id +
-                ", product=" + (product != null ? product.getName() : "null") +
-                ", quantity=" + quantity +
-                ", price=" + price +
-                ", subtotal=" + getSubtotal() +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
+    public BigDecimal getSubtotal() {
+        if (this.price == null) {
+            return BigDecimal.ZERO;
+        }
+        return this.price.multiply(BigDecimal.valueOf(this.quantity));
     }
 }

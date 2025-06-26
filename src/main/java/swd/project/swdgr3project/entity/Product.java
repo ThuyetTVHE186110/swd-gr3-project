@@ -1,146 +1,76 @@
 package swd.project.swdgr3project.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import jakarta.persistence.*; // Import các annotation của Jakarta Persistence (thay cho javax.persistence nếu dùng Tomcat 10+)
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Entity class representing a product in the system.
+ * FINAL CORRECTED VERSION with JPA annotations.
  */
+@Data
+@Entity // <-- ANNOTATION QUAN TRỌNG NHẤT
+@Table(name = "products")
 public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Lob
     private String description;
-    private double price;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
     private int stock;
+
     private String imageUrl;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "product_additional_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
     private List<String> additionalImages = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ProductCategory category;
-    private boolean active;
+
+    private boolean active = true;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
-    // Constructors
-    public Product() {
-    }
+    // Lombok's @Data annotation handles constructors, getters, and setters.
 
-    public Product(Long id, String name, String description, double price, int stock, String imageUrl,
-                  ProductCategory category, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.stock = stock;
-        this.imageUrl = imageUrl;
-        this.category = category;
-        this.active = active;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public List<String> getAdditionalImages() {
-        return additionalImages;
-    }
-
-    public void setAdditionalImages(List<String> additionalImages) {
-        this.additionalImages = additionalImages;
-    }
-
+    // Helper methods
     public void addAdditionalImage(String imageUrl) {
+        if (this.additionalImages == null) {
+            this.additionalImages = new ArrayList<>();
+        }
         this.additionalImages.add(imageUrl);
     }
 
     public void removeAdditionalImage(String imageUrl) {
-        this.additionalImages.remove(imageUrl);
+        if (this.additionalImages != null) {
+            this.additionalImages.remove(imageUrl);
+        }
     }
 
-    public ProductCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(ProductCategory category) {
-        this.category = category;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    /**
-     * Decreases the stock by the specified quantity.
-     * 
-     * @param quantity The quantity to decrease
-     * @return true if the stock was successfully decreased, false if there is not enough stock
-     */
     public boolean decreaseStock(int quantity) {
         if (this.stock >= quantity) {
             this.stock -= quantity;
@@ -149,26 +79,7 @@ public class Product {
         return false;
     }
 
-    /**
-     * Increases the stock by the specified quantity.
-     * 
-     * @param quantity The quantity to increase
-     */
     public void increaseStock(int quantity) {
         this.stock += quantity;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", stock=" + stock +
-                ", category=" + (category != null ? category.getName() : "null") +
-                ", active=" + active +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }

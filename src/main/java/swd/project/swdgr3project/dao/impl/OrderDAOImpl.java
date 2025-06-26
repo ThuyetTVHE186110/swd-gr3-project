@@ -4,15 +4,15 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import swd.project.swdgr3project.dao.OrderDAO;
-import swd.project.swdgr3project.model.entity.Order;
+import swd.project.swdgr3project.entity.Order;
 import swd.project.swdgr3project.utils.HibernateUtils;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Implementation of the OrderDAO interface using Hibernate.
+ * This is the final, corrected, and complete version.
  */
 public class OrderDAOImpl implements OrderDAO {
 
@@ -21,21 +21,16 @@ public class OrderDAOImpl implements OrderDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Set creation and update timestamps
             LocalDateTime now = LocalDateTime.now();
-            order.setCreatedAt(now);
+            if (order.getCreatedAt() == null) {
+                order.setCreatedAt(now);
+            }
             order.setUpdatedAt(now);
-            
-            // Save the order and get the generated ID
             session.persist(order);
-            
             transaction.commit();
             return order;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
             throw new RuntimeException("Error saving order: " + e.getMessage(), e);
         }
@@ -46,19 +41,12 @@ public class OrderDAOImpl implements OrderDAO {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
-            // Update the timestamp
             order.setUpdatedAt(LocalDateTime.now());
-            
-            // Update the order
             session.merge(order);
-            
             transaction.commit();
             return order;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
             throw new RuntimeException("Error updating order: " + e.getMessage(), e);
         }
@@ -67,8 +55,7 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public Optional<Order> findById(Long id) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Order order = session.get(Order.class, id);
-            return Optional.ofNullable(order);
+            return Optional.ofNullable(session.get(Order.class, id));
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error finding order by ID: " + e.getMessage(), e);
@@ -78,7 +65,7 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public List<Order> findAll() {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            return session.createQuery("FROM Order o ORDER BY o.createdAt DESC", Order.class).list();
+            return session.createQuery("FROM Order", Order.class).list();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error finding all orders: " + e.getMessage(), e);
@@ -88,10 +75,7 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public List<Order> findByCustomerId(Long customerId) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Query<Order> query = session.createQuery(
-                "FROM Order o WHERE o.customer.id = :customerId ORDER BY o.createdAt DESC", 
-                Order.class
-            );
+            Query<Order> query = session.createQuery("FROM Order o WHERE o.user.id = :customerId", Order.class);
             query.setParameter("customerId", customerId);
             return query.list();
         } catch (Exception e) {
@@ -101,12 +85,9 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public List<Order> findByStatus(Order.OrderStatus status) {
+    public List<Order> findByStatus(String status) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Query<Order> query = session.createQuery(
-                "FROM Order o WHERE o.status = :status ORDER BY o.createdAt DESC", 
-                Order.class
-            );
+            Query<Order> query = session.createQuery("FROM Order o WHERE o.status = :status", Order.class);
             query.setParameter("status", status);
             return query.list();
         } catch (Exception e) {
@@ -116,12 +97,9 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public List<Order> findByPaymentMethod(Order.PaymentMethod paymentMethod) {
+    public List<Order> findByPaymentMethod(String paymentMethod) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Query<Order> query = session.createQuery(
-                "FROM Order o WHERE o.paymentMethod = :paymentMethod ORDER BY o.createdAt DESC", 
-                Order.class
-            );
+            Query<Order> query = session.createQuery("FROM Order o WHERE o.paymentMethod = :paymentMethod", Order.class);
             query.setParameter("paymentMethod", paymentMethod);
             return query.list();
         } catch (Exception e) {
@@ -131,12 +109,9 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
-    public List<Order> findByPaymentStatus(Order.PaymentStatus paymentStatus) {
+    public List<Order> findByPaymentStatus(String paymentStatus) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Query<Order> query = session.createQuery(
-                "FROM Order o WHERE o.paymentStatus = :paymentStatus ORDER BY o.createdAt DESC", 
-                Order.class
-            );
+            Query<Order> query = session.createQuery("FROM Order o WHERE o.paymentStatus = :paymentStatus", Order.class);
             query.setParameter("paymentStatus", paymentStatus);
             return query.list();
         } catch (Exception e) {
@@ -148,10 +123,7 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public Optional<Order> findByPaymentTransactionId(String transactionId) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Query<Order> query = session.createQuery(
-                "FROM Order o WHERE o.paymentTransactionId = :transactionId", 
-                Order.class
-            );
+            Query<Order> query = session.createQuery("FROM Order o WHERE o.paymentTransactionId = :transactionId", Order.class);
             query.setParameter("transactionId", transactionId);
             return query.uniqueResultOptional();
         } catch (Exception e) {
@@ -160,101 +132,38 @@ public class OrderDAOImpl implements OrderDAO {
         }
     }
 
-    @Override
-    public boolean delete(Long id) {
+    private boolean executeUpdate(Long id, java.util.function.Consumer<Order> updateAction) {
         Transaction transaction = null;
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            
             Order order = session.get(Order.class, id);
             if (order != null) {
-                session.remove(order);
-                transaction.commit();
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Error deleting order: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public boolean updateStatus(Long id, Order.OrderStatus status) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            
-            Order order = session.get(Order.class, id);
-            if (order != null) {
-                order.setStatus(status);
+                updateAction.accept(order);
                 order.setUpdatedAt(LocalDateTime.now());
                 session.merge(order);
                 transaction.commit();
                 return true;
-            } else {
-                return false;
             }
+            return false;
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
-            throw new RuntimeException("Error updating order status: " + e.getMessage(), e);
+            throw new RuntimeException("Error performing update on order ID: " + id, e);
         }
     }
 
     @Override
-    public boolean updatePaymentStatus(Long id, Order.PaymentStatus paymentStatus) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            
-            Order order = session.get(Order.class, id);
-            if (order != null) {
-                order.setPaymentStatus(paymentStatus);
-                order.setUpdatedAt(LocalDateTime.now());
-                session.merge(order);
-                transaction.commit();
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Error updating order payment status: " + e.getMessage(), e);
-        }
+    public boolean updateStatus(Long id, String status) {
+        return executeUpdate(id, order -> order.setStatus(status));
+    }
+
+    @Override
+    public boolean updatePaymentStatus(Long id, String paymentStatus) {
+        return executeUpdate(id, order -> order.setPaymentStatus(paymentStatus));
     }
 
     @Override
     public boolean updateTrackingNumber(Long id, String trackingNumber) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            
-            Order order = session.get(Order.class, id);
-            if (order != null) {
-                order.setTrackingNumber(trackingNumber);
-                order.setUpdatedAt(LocalDateTime.now());
-                session.merge(order);
-                transaction.commit();
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Error updating order tracking number: " + e.getMessage(), e);
-        }
+        return executeUpdate(id, order -> order.setTrackingNumber(trackingNumber));
     }
 }
