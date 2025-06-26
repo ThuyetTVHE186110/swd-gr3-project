@@ -1,23 +1,23 @@
 <hibernate-configuration>
     <session-factory>
-        <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
-        <property name="hibernate.connection.url">jdbc:sqlserver://localhost:1433;databaseName=swdproject;encrypt=true;trustServerCertificate=true</property>
-        <property name="hibernate.connection.username">sa</property>
-        <property name="hibernate.connection.password">123</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/swd_gr3_electricstore?useSSL=false&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">@Huyen17022002</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
 
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
 
         <!-- Entity classes -->
-        <mapping class="swd.project.swdgr3project.entity.User"/>
-        <mapping class="swd.project.swdgr3project.entity.ProductCategory"/>
-        <mapping class="swd.project.swdgr3project.entity.Product"/>
-        <mapping class="swd.project.swdgr3project.entity.Cart"/>
-        <mapping class="swd.project.swdgr3project.entity.CartItem"/>
-        <mapping class="swd.project.swdgr3project.entity.Order"/>
-        <mapping class="swd.project.swdgr3project.entity.OrderItem"/>
+<!--        <mapping class="swd.project.swdgr3project.entity.User"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.ProductCategory"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.Product"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.Cart"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.CartItem"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.Order"/>-->
+<!--        <mapping class="swd.project.swdgr3project.entity.OrderItem"/>-->
         <!--TODO : add entity class-->
     </session-factory>
 </hibernate-configuration>
