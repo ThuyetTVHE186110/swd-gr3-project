@@ -66,7 +66,7 @@ public interface OrderService {
      * @param status The order status
      * @return List of order DTOs with the specified status
      */
-    List<OrderDTO> getOrdersByStatus(Order.Status status);
+    List<OrderDTO> getOrdersByStatus(Order.OrderStatus status);
     
     /**
      * Get orders by payment method.
@@ -100,7 +100,7 @@ public interface OrderService {
      * @return The updated order DTO
      * @throws IllegalArgumentException if order not found
      */
-    OrderDTO updateOrderStatus(Long orderId, Order.Status status);
+    OrderDTO updateOrderStatus(Long orderId, Order.OrderStatus status);
     
     /**
      * Update an order's payment status.
