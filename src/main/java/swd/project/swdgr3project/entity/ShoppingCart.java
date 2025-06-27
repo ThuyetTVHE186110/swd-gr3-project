@@ -1,56 +1,102 @@
 package swd.project.swdgr3project.entity;
 
 import lombok.Data;
-import java.math.BigDecimal; // Import BigDecimal
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * A transient (non-persistent) object to hold cart items within a user's session.
- * FINAL CORRECTED VERSION using BigDecimal for subtotal calculation.
- */
 @Data
 public class ShoppingCart {
 
     private List<CartItem> items = new ArrayList<>();
+    private BigDecimal shippingFee = new BigDecimal("30000"); // Đặt phí vận chuyển cố định là 30.000đ
 
-    // A more robust implementation that merges quantities if the product already exists.
+    // CHÚ Ý QUAN TRỌNG:
+    // Các trường rawTotal và discount KHÔNG CÓ sẵn trong Product/CartItem/ShoppingCart của bạn.
+    // Để hiển thị chúng chính xác, bạn cần:
+    // 1. Thêm trường 'oldPrice' vào Product.java (nếu có giá gốc)
+    // 2. Thêm logic tính toán 'rawTotal' và 'discount' vào ShoppingCart.
+    // Hiện tại, tôi sẽ giả định:
+    //    - 'productsTotal' là tổng tiền các sản phẩm (tức là tổng price * quantity của CartItem)
+    //    - 'rawTotal' = 'productsTotal' (vì không có oldPrice cao hơn)
+    //    - 'discount' = 0 (vì không có logic chiết khấu rõ ràng)
+    //    - 'finalTotal' = productsTotal + shippingFee
+
+    private BigDecimal productsTotal; // Tổng tiền của các sản phẩm (trước phí vận chuyển/chiết khấu)
+    private BigDecimal rawTotal;      // Tổng tiền hàng (có thể là giá gốc nếu có oldPrice)
+    private BigDecimal discount;      // Tổng chiết khấu
+    private BigDecimal finalTotal;    // Tổng tiền cuối cùng phải trả
+
+    public ShoppingCart() {
+        this.items = new ArrayList<>();
+        // Khởi tạo các giá trị BigDecimal về 0
+        this.productsTotal = BigDecimal.ZERO;
+        this.rawTotal = BigDecimal.ZERO;
+        this.discount = BigDecimal.ZERO;
+        this.finalTotal = BigDecimal.ZERO;
+    }
+
     public void addItem(CartItem newItem) {
         if (newItem == null || newItem.getProduct() == null || newItem.getProduct().getId() == null) {
-            return; // Do not add invalid items
+            return;
         }
 
         for (CartItem existingItem : items) {
-            // Check if product already exists in the cart
             if (Objects.equals(existingItem.getProduct().getId(), newItem.getProduct().getId())) {
-                // Update quantity and return
                 existingItem.setQuantity(existingItem.getQuantity() + newItem.getQuantity());
+                // Cập nhật lại price của CartItem nếu cần (nếu giá sản phẩm có thể thay đổi trong DB)
+                existingItem.setPrice(newItem.getProduct().getPrice()); // Cập nhật giá mới nhất từ Product
+                recalculateTotals(); // Tính toán lại sau khi cập nhật
                 return;
             }
         }
-        // If product is not in the cart, add it as a new item
         items.add(newItem);
+        recalculateTotals(); // Tính toán lại sau khi thêm item mới
     }
 
-    /**
-     * Calculates the subtotal of all items in the cart.
-     * @return The subtotal as a BigDecimal.
-     */
-    public BigDecimal getSubtotal() { // SỬA LỖI: Thay đổi kiểu trả về thành BigDecimal
+    // Phương thức tính toán tổng tiền của các sản phẩm (subtotal)
+    public BigDecimal calculateProductsTotal() {
         if (items == null) {
             return BigDecimal.ZERO;
         }
-
-        // SỬA LỖI: Sử dụng map và reduce để tính tổng các giá trị BigDecimal
         return items.stream()
-                .map(CartItem::getSubtotal) // .map() sẽ tạo ra một Stream<BigDecimal>
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // Bắt đầu từ 0 và cộng dồn các giá trị
+                .map(CartItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Bạn có thể giữ lại phiên bản trả về double nếu cần cho việc hiển thị,
-    // nhưng nên dùng phiên bản BigDecimal cho các logic tính toán.
-    public double getSubtotalAsDouble() {
-        return getSubtotal().doubleValue();
+    // Phương thức recalculateTotals() sẽ cập nhật tất cả các trường tổng tiền
+    public void recalculateTotals() {
+        this.productsTotal = calculateProductsTotal(); // Tổng tiền của các sản phẩm
+
+        // Với cấu trúc Product bạn cung cấp (không có oldPrice):
+        this.rawTotal = this.productsTotal; // Tổng tiền hàng ban đầu coi như bằng tổng tiền sản phẩm
+        this.discount = BigDecimal.ZERO;    // Không có logic chiết khấu cụ thể, nên đặt là 0
+
+        // Final total = tổng sản phẩm + phí vận chuyển - chiết khấu
+        this.finalTotal = this.productsTotal.add(this.shippingFee).subtract(this.discount);
+
+        // Đảm bảo finalTotal không âm
+        if (this.finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+            this.finalTotal = BigDecimal.ZERO;
+        }
+    }
+
+    // Getters đã được Lombok @Data tạo ra: getItems(), getShippingFee(), getProductsTotal(), getRawTotal(), getDiscount(), getFinalTotal()
+
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "ShoppingCart{" +
+                "items=" + items.size() +
+                ", productsTotal=" + productsTotal +
+                ", shippingFee=" + shippingFee +
+                ", rawTotal=" + rawTotal +
+                ", discount=" + discount +
+                ", finalTotal=" + finalTotal +
+                '}';
     }
 }

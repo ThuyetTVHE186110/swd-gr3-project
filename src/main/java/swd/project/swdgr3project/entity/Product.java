@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import jakarta.persistence.*; // Import các annotation của Jakarta Persistence (thay cho javax.persistence nếu dùng Tomcat 10+)
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,10 +12,10 @@ import java.util.List;
 
 /**
  * Entity class representing a product in the system.
- * FINAL CORRECTED VERSION with JPA annotations.
+ * FINAL CORRECTED VERSION with JPA annotations and minor adjustments.
  */
 @Data
-@Entity // <-- ANNOTATION QUAN TRỌNG NHẤT
+@Entity
 @Table(name = "products")
 public class Product {
 
@@ -37,13 +37,16 @@ public class Product {
 
     private String imageUrl;
 
+    // Đối với một danh sách các chuỗi đơn giản, LAZY là mặc định và thường là tốt.
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_additional_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     private List<String> additionalImages = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    // SỬA LỖI 1: Thêm nullable = false
+    // SỬA LỖI 2: Tạm thời đổi sang EAGER để giải quyết LazyInitializationException trong luồng hiện tại
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", nullable = false) // Đảm bảo category_id không được null
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private ProductCategory category;
@@ -57,7 +60,7 @@ public class Product {
 
     // Lombok's @Data annotation handles constructors, getters, and setters.
 
-    // Helper methods
+    // Helper methods (giữ nguyên, chúng đã đúng)
     public void addAdditionalImage(String imageUrl) {
         if (this.additionalImages == null) {
             this.additionalImages = new ArrayList<>();

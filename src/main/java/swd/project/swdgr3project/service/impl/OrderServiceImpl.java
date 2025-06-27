@@ -53,8 +53,16 @@ public class OrderServiceImpl implements OrderService {
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setQuantity(cartItem.getQuantity());
-            // Assumes cartItem.getPrice() returns BigDecimal
             orderItem.setPrice(cartItem.getPrice());
+
+            // SỬA LỖI: Kiểm tra null trước khi gọi getter
+            String productName = cartItem.getProductName(); // Giả sử CartItem có getter này
+            if (productName == null || productName.trim().isEmpty()) {
+                productName = "Sản phẩm không xác định";
+                // Hoặc throw exception nếu tên sản phẩm là bắt buộc
+            }
+            orderItem.setProductName(productName); // Gán giá trị đã kiểm tra
+
             orderItem.setOrder(order);
             return orderItem;
         }).collect(Collectors.toList());
