@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều khoản và Điều kiện Giao dịch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #d70018;
+            --text-color: #444;
+            --subtext-color: #666;
+            --border-color: #e0e0e0;
+            --background-color: #f1f1f1;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid #f1f1f1;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumbs {
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .breadcrumbs a {
+            color: var(--subtext-color);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            color: var(--primary-red);
+        }
+
+        .breadcrumbs span {
+            margin: 0 8px;
+            color: #ccc;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .policy-content h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 30px;
+        }
+
+        .policy-content p, .policy-content li {
+            text-align: justify;
+        }
+
+        .policy-content ol {
+            padding-left: 20px;
+        }
+
+        .policy-content ol > li {
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .policy-content ol > li > p, .policy-content ol > li > ul {
+            font-weight: 400;
+        }
+
+        .qa-section .title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .qa-section .mascot {
+            width: 50px;
+            height: 50px;
+        }
+
+        .qa-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: white;
+            box-sizing: border-box;
+            min-height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .qa-form button {
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            float: right;
+        }
+
+        .comment-thread {
+            margin-top: 60px;
+            clear: both;
+        }
+
+        .comment {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .comment .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .comment .comment-body {
+            width: 100%;
+        }
+
+        .comment .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .comment .username {
+            font-weight: 700;
+        }
+
+        .comment .timestamp {
+            font-size: 12px;
+            color: var(--subtext-color);
+        }
+
+        .admin-reply {
+            margin-left: 55px; /* Thụt vào so với comment gốc */
+            border-left: 2px solid var(--primary-red);
+            padding-left: 15px;
+        }
+
+        .admin-reply .avatar {
+            background-color: var(--primary-red);
+        }
+
+        .admin-reply .username-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .admin-reply .admin-badge {
+            background-color: var(--primary-red);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="breadcrumbs">
+        <a href="#">Trang chủ</a>
+        <span>/</span>
+        Điều khoản và Điều kiện Giao dịch
+    </div>
+
+    <div class="card">
+        <h1>ĐIỀU KHOẢN VÀ ĐIỀU KIỆN GIAO DỊCH</h1>
+
+        <div class="policy-content">
+            <p>Chào mừng Quý khách đến với website của chúng tôi. Bằng việc truy cập và thực hiện giao dịch trên website, Quý khách xác nhận đã đọc, hiểu và đồng ý tuân thủ các điều khoản và điều kiện được quy định dưới đây.</p>
+
+            <ol>
+                <li>
+                    <strong>Chấp nhận Điều khoản</strong>
+                    <p>Các điều khoản và điều kiện này cấu thành một thỏa thuận pháp lý ràng buộc giữa Quý khách và Cửa hàng. Nếu Quý khách không đồng ý với bất kỳ điều khoản nào, vui lòng không sử dụng trang web này để đặt hàng.</p>
+                </li>
+                <li>
+                    <strong>Thông tin sản phẩm</strong>
+                    <p>Chúng tôi cam kết cung cấp thông tin chi tiết và chính xác nhất cho từng sản phẩm. Tuy nhiên, do yếu tố kỹ thuật, màu sắc sản phẩm trên thực tế có thể có sự chênh lệch nhỏ so với hình ảnh hiển thị. Mọi thông tin về giá cả, khuyến mãi đều có thể thay đổi mà không cần báo trước.</p>
+                </li>
+                <li>
+                    <strong>Đặt hàng và Xác nhận đơn hàng</strong>
+                    <p>Khi Quý khách hoàn tất quy trình đặt hàng, một email xác nhận sẽ được gửi đến địa chỉ email Quý khách đã cung cấp. Email này chỉ nhằm mục đích thông báo rằng chúng tôi đã nhận được đơn đặt hàng của bạn và không phải là sự xác nhận rằng chúng tôi sẽ chấp nhận đơn hàng.</p>
+                    <p>Đơn hàng chỉ được xem là được chấp nhận khi chúng tôi gửi email xác nhận vận chuyển hoặc liên hệ trực tiếp qua điện thoại để xác nhận giao hàng.</p>
+                </li>
+                <li>
+                    <strong>Chính sách giá cả và Thanh toán</strong>
+                    <ul>
+                        <li>Giá niêm yết trên website là giá cuối cùng đã bao gồm Thuế giá trị gia tăng (VAT). Giá này có thể chưa bao gồm chi phí vận chuyển.</li>
+                        <li>Chúng tôi chấp nhận các hình thức thanh toán: Thanh toán khi nhận hàng (COD) và Thanh toán trực tuyến qua cổng VNPAY.</li>
+                        <li>Quý khách cam kết rằng tất cả thông tin thanh toán mà bạn cung cấp là đúng, chính xác và bạn được ủy quyền hợp pháp để sử dụng phương thức thanh toán đó.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Chính sách Giao hàng và Đồng kiểm</strong>
+                    <p>Chúng tôi hỗ trợ giao hàng trên toàn quốc. Thời gian giao hàng dự kiến sẽ được thông báo trong quá trình đặt hàng. Quý khách được quyền kiểm tra sản phẩm (đồng kiểm) cùng nhân viên giao hàng trước khi thanh toán để đảm bảo sản phẩm đúng mẫu mã, không bị hư hỏng, bể vỡ.</p>
+                </li>
+                <li>
+                    <strong>Quyền sở hữu trí tuệ</strong>
+                    <p>Tất cả nội dung, hình ảnh, thiết kế, logo trên trang web này đều là tài sản của Cửa hàng và được bảo vệ bởi luật sở hữu trí tuệ. Mọi hành vi sao chép, sửa đổi, phân phối mà không có sự cho phép bằng văn bản của chúng tôi đều là bất hợp pháp.</p>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="card qa-section">
+        <div class="title">
+            <img src="https://cellphones.com.vn/smember/_nuxt/img/CS-Smember.b37c0f1.png" alt="Mascot" class="mascot">
+            <h2>Hỏi và đáp</h2>
+        </div>
+        <p>CellphoneS sẽ phản hồi trong vòng 1 giờ. Nếu Quý khách gửi câu hỏi sau 22h, chúng tôi sẽ trả lời vào sáng hôm sau. Thông tin số điện thoại theo thời gian, vui lòng đặt câu hỏi chi tiết để nhận được cập nhật tốt nhất.</p>
+
+        <form class="qa-form" onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã gửi câu hỏi!');">
+            <textarea placeholder="Viết câu hỏi của bạn tại đây"></textarea>
+            <button type="submit">Gửi câu hỏi</button>
+        </form>
+
+        <div class="comment-thread">
+            <div class="comment">
+                <div class="avatar">L</div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <span class="username">Nguyễn Văn Lương</span>
+                        <span class="timestamp">· 15 phút trước</span>
+                    </div>
+                    <div class="comment-content">
+                        <p>Em có được xem hàng trước khi trả tiền không shop? Chính sách đồng kiểm cụ thể là như thế nào ạ?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comment admin-reply">
+                <div class="avatar">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <div class="username-wrapper">
+                            <span class="username">Quản trị viên</span>
+                            <span class="admin-badge">Admin</span>
+                        </div>
+                        <span class="timestamp">· 5 phút trước</span>
+                    </div>
+                    <div class="comment-content">
+                        <p>Dạ chào anh Lương,</p>
+                        <p>Cảm ơn anh đã quan tâm đến sản phẩm của cửa hàng. Dạ, tất cả các đơn hàng đều được áp dụng chính sách đồng kiểm trước khi thanh toán ạ. Anh sẽ được mở hộp để kiểm tra đúng sản phẩm, màu sắc, tình trạng máy không bị cấn móp, bể vỡ cùng với nhân viên giao hàng. Anh lưu ý không kích hoạt máy hoặc đăng nhập tài khoản trong quá trình đồng kiểm nhé ạ.</p>
+                        <p>Nếu có bất kỳ vấn đề gì, anh có thể từ chối nhận hàng và không phải trả bất kỳ chi phí nào ạ. Xin thông tin đến anh!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
