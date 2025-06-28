@@ -37,5 +37,5 @@ build/
 ### Mac OS ###
 .DS_Store
 .pom.xml
-.src/main/webapp/WEB-INF/web.xml
-.src/main/resources/hibernate.cfg.xml
+/src/main/webapp/WEB-INF/web.xml
+/src/main/resources/hibernate.cfg.xml
