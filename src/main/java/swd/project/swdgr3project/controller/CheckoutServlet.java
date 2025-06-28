@@ -1,8 +1,13 @@
 package swd.project.swdgr3project.controller;
 
+import swd.project.swdgr3project.entity.District;
 import swd.project.swdgr3project.entity.ShoppingCart;
+import swd.project.swdgr3project.entity.Ward;
 import swd.project.swdgr3project.model.dto.OrderDTO;
 import swd.project.swdgr3project.service.CheckoutService;
+import swd.project.swdgr3project.entity.Province;
+import com.google.gson.Gson; // Import Gson
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,15 +15,39 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import swd.project.swdgr3project.service.LocationService;
+import swd.project.swdgr3project.service.impl.LocationServiceImpl;
+
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
 
     private final CheckoutService checkoutService = new CheckoutService();
+    private final Gson gson = new Gson();
+    private final LocationService locationService = new LocationServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            // 1. Tải cả 3 danh sách từ database
+            List<Province> provinces = locationService.getAllProvinces();
+            List<District> districts = locationService.getAllDistricts();
+            List<Ward> wards = locationService.getAllWards();
+
+            // 2. Đặt cả 3 danh sách vào request attribute
+            req.setAttribute("provinces", provinces);
+            req.setAttribute("districts", districts);
+            req.setAttribute("wards", wards);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Có thể đặt một thông báo lỗi vào request nếu muốn
+            req.setAttribute("errorMessage", "Không thể tải dữ liệu địa chỉ từ server.");
+        }
+
+        // 3. Chuyển hướng đến trang JSP
         req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
     }
 
