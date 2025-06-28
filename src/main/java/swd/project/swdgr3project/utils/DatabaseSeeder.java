@@ -58,7 +58,7 @@ public class DatabaseSeeder {
 
     private static void seedCategories(Session session) {
         // Check if categories already exist
-        Long categoryCount = session.createQuery("SELECT COUNT(c) FROM Category c", Long.class).getSingleResult();
+        Long categoryCount = session.createQuery("SELECT COUNT(c) FROM ProductCategory c", Long.class).getSingleResult();
 
         if (categoryCount == 0) {
             log.info("Seeding categories...");
