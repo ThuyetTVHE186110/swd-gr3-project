@@ -4,8 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import swd.project.swdgr3project.dao.UserDAO;
-import swd.project.swdgr3project.model.entity.User;
-import swd.project.swdgr3project.model.entity.User.AuthProvider;
+import swd.project.swdgr3project.entity.User;
 import swd.project.swdgr3project.utils.HibernateUtils;
 
 import java.time.LocalDateTime;
@@ -101,18 +100,17 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId) {
+    public Optional<User> findByGoogleId(String googleId) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
             Query<User> query = session.createQuery(
-                "FROM User WHERE authProvider = :provider AND providerId = :providerId", 
+                "FROM User WHERE googleId = :googleId", 
                 User.class
             );
-            query.setParameter("provider", provider);
-            query.setParameter("providerId", providerId);
+            query.setParameter("googleId", googleId);
             return query.uniqueResultOptional();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error finding user by provider: " + e.getMessage(), e);
+            throw new RuntimeException("Error finding user by Google ID: " + e.getMessage(), e);
         }
     }
 
@@ -196,6 +194,54 @@ public class UserDAOImpl implements UserDAO {
             }
             e.printStackTrace();
             throw new RuntimeException("Error activating user: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<User> findByRole(String role) {
+        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
+            Query<User> query = session.createQuery("FROM User WHERE role = :role", User.class);
+            query.setParameter("role", role);
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error finding users by role: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<User> findByActive(boolean active) {
+        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
+            Query<User> query = session.createQuery("FROM User WHERE active = :active", User.class);
+            query.setParameter("active", active);
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error finding users by active status: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<User> findWithPagination(int page, int limit) {
+        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
+            Query<User> query = session.createQuery("FROM User ORDER BY createdAt DESC", User.class);
+            query.setFirstResult((page - 1) * limit);
+            query.setMaxResults(limit);
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error finding users with pagination: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public long count() {
+        try (Session session = HibernateUtils.getSessionFactory().openSession()) {
+            Query<Long> query = session.createQuery("SELECT COUNT(u) FROM User u", Long.class);
+            return query.uniqueResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error counting users: " + e.getMessage(), e);
         }
     }
 }

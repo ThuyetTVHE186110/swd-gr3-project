@@ -1,8 +1,7 @@
 package swd.project.swdgr3project.service;
 
 import swd.project.swdgr3project.model.dto.UserDTO;
-import swd.project.swdgr3project.model.entity.User;
-import swd.project.swdgr3project.model.entity.User.AuthProvider;
+import swd.project.swdgr3project.entity.User;
 
 import java.util.List;
 
@@ -24,15 +23,14 @@ public interface UserService {
     UserDTO registerUser(String username, String email, String password, String fullName);
     
     /**
-     * Register or login a user with OAuth provider.
+     * Register or login a user with Google OAuth.
      *
-     * @param email The email from OAuth provider
-     * @param fullName The full name from OAuth provider
-     * @param provider The OAuth provider (e.g., GOOGLE)
-     * @param providerId The unique ID from the provider
+     * @param email The email from Google
+     * @param fullName The full name from Google
+     * @param googleId The unique Google ID
      * @return The user DTO
      */
-    UserDTO processOAuthUser(String email, String fullName, AuthProvider provider, String providerId);
+    UserDTO processGoogleUser(String email, String fullName, String googleId);
     
     /**
      * Authenticate a user with username/email and password.
@@ -105,10 +103,58 @@ public interface UserService {
     /**
      * Get users by role.
      *
-     * @param role The role to filter by
+     * @param role The role to filter by (as String)
      * @return List of user DTOs with the specified role
      */
-    List<UserDTO> getUsersByRole(User.UserRole role);
+    List<UserDTO> getUsersByRole(String role);
+    
+    /**
+     * Get active users.
+     *
+     * @return List of active user DTOs
+     */
+    List<UserDTO> getActiveUsers();
+    
+    /**
+     * Get users with pagination.
+     *
+     * @param page The page number (1-based)
+     * @param limit The maximum number of users per page
+     * @return List of user DTOs for the specified page
+     */
+    List<UserDTO> getUsersWithPagination(int page, int limit);
+    
+    /**
+     * Update user role.
+     *
+     * @param userId The user ID
+     * @param newRole The new role (as String)
+     * @return Updated user DTO
+     * @throws IllegalArgumentException if user not found
+     */
+    UserDTO updateUserRole(Long userId, String newRole);
+    
+    /**
+     * Get total users count.
+     *
+     * @return Total number of users
+     */
+    long getTotalUsersCount();
+    
+    /**
+     * Get active users count.
+     *
+     * @return Number of active users
+     */
+    long getActiveUsersCount();
+    
+    /**
+     * Get users count by role.
+     *
+     * @param role The role to count (as String)
+     * @return Number of users with the specified role
+     */
+    long getUsersCountByRole(String role);
     
     /**
      * Deactivate a user account.

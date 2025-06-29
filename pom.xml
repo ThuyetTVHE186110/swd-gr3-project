@@ -25,7 +25,7 @@
         <junit.version>5.11.0</junit.version>
         <lombok.version>1.18.30</lombok.version>
         <payos.version>1.0.3</payos.version>
-            <cloudinary.version>2.3.0</cloudinary.version>
+        <cloudinary.version>2.3.0</cloudinary.version>
     </properties>
 
     <dependencies>
@@ -99,6 +99,11 @@
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-core</artifactId>
+            <version>${cloudinary.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http5</artifactId>
             <version>${cloudinary.version}</version>
         </dependency>
 

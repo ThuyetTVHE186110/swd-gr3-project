@@ -1,7 +1,6 @@
 package swd.project.swdgr3project.dao;
 
-import swd.project.swdgr3project.model.entity.User;
-import swd.project.swdgr3project.model.entity.User.AuthProvider;
+import swd.project.swdgr3project.entity.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,13 +52,12 @@ public interface UserDAO {
     Optional<User> findByEmail(String email);
     
     /**
-     * Find a user by their OAuth provider ID
+     * Find a user by their Google ID
      * 
-     * @param provider The authentication provider (e.g., GOOGLE)
-     * @param providerId The provider-specific user ID
+     * @param googleId The Google ID to search for
      * @return An Optional containing the user if found, or empty if not found
      */
-    Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
+    Optional<User> findByGoogleId(String googleId);
     
     /**
      * Get all users from the database
@@ -91,4 +89,36 @@ public interface UserDAO {
      * @return true if the user was activated, false otherwise
      */
     boolean activate(Long id);
+
+    /**
+     * Find users by their role
+     * 
+     * @param role The role to search for (as String)
+     * @return A list of users with the specified role
+     */
+    List<User> findByRole(String role);
+
+    /**
+     * Find users by their active status
+     * 
+     * @param active The active status to search for
+     * @return A list of users with the specified active status
+     */
+    List<User> findByActive(boolean active);
+
+    /**
+     * Get users with pagination
+     * 
+     * @param page The page number (1-based)
+     * @param limit The maximum number of users per page
+     * @return A list of users for the specified page
+     */
+    List<User> findWithPagination(int page, int limit);
+
+    /**
+     * Count total number of users
+     * 
+     * @return The total number of users
+     */
+    long count();
 }

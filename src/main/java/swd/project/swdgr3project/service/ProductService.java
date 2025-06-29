@@ -17,14 +17,29 @@ public interface ProductService {
     ProductDTO getProductById(Long productId);
 
     List<ProductDTO> getAllProducts();
+    
+    // Add pagination methods
+    List<ProductDTO> getAllProducts(int page, int limit);
 
     List<ProductDTO> getAllActiveProducts();
+    
+    List<ProductDTO> getAllActiveProducts(int page, int limit);
 
     List<ProductDTO> getProductsByCategory(Long categoryId);
+    
+    // Add overload for category name
+    List<ProductDTO> getProductsByCategory(String categoryName, int page, int limit);
+    
+    List<ProductDTO> getProductsByCategory(Long categoryId, int page, int limit);
 
     List<ProductDTO> getActiveProductsByCategory(Long categoryId);
+    
+    List<ProductDTO> getActiveProductsByCategory(Long categoryId, int page, int limit);
 
     List<ProductDTO> searchProducts(String keyword);
+    
+    // Add pagination for search
+    List<ProductDTO> searchProducts(String keyword, int page, int limit);
 
     boolean deactivateProduct(Long productId);
 
@@ -60,4 +75,16 @@ public interface ProductService {
      * Delete a product category.
      */
     boolean deleteCategory(Long categoryId);
+    
+    // Additional methods needed by AdminServlet
+    
+    /**
+     * Create a product using ProductDTO.
+     */
+    ProductDTO createProduct(ProductDTO productDTO);
+    
+    /**
+     * Update a product using ProductDTO.
+     */
+    ProductDTO updateProduct(ProductDTO productDTO);
 }

@@ -68,4 +68,38 @@ public class CartItem {
         }
         return this.price.multiply(BigDecimal.valueOf(this.quantity));
     }
+
+    /**
+     * Updates the total price based on current price and quantity.
+     * This method recalculates the subtotal.
+     */
+    public void updateTotalPrice() {
+        // The total price is calculated dynamically via getSubtotal()
+        // This method is here for compatibility but doesn't need to do anything
+        // since we calculate subtotal on-demand
+    }
+
+    /**
+     * Sets the unit price for this cart item.
+     * @param unitPrice the unit price
+     */
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.price = unitPrice;
+    }
+
+    /**
+     * Gets the unit price for this cart item.
+     * @return the unit price
+     */
+    public BigDecimal getUnitPrice() {
+        return this.price;
+    }
+
+    /**
+     * Gets the total price (subtotal) for this cart item.
+     * @return the total price
+     */
+    public BigDecimal getTotalPrice() {
+        return getSubtotal();
+    }
 }

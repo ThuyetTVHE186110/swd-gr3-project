@@ -4,9 +4,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import swd.project.swdgr3project.dao.CartDAO;
-import swd.project.swdgr3project.model.entity.Cart;
-import swd.project.swdgr3project.model.entity.Product;
-import swd.project.swdgr3project.model.entity.User;
+import swd.project.swdgr3project.entity.Cart;
+import swd.project.swdgr3project.entity.CartItem;
+import swd.project.swdgr3project.entity.Product;
+import swd.project.swdgr3project.entity.User;
+import swd.project.swdgr3project.exception.DAOException;
 import swd.project.swdgr3project.utils.HibernateUtils;
 
 import java.math.BigDecimal;
@@ -42,7 +44,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error saving cart: " + e.getMessage(), e);
+            throw new DAOException("Error saving cart: " + e.getMessage(), e);
         }
     }
 
@@ -68,7 +70,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error updating cart: " + e.getMessage(), e);
+            throw new DAOException("Error updating cart: " + e.getMessage(), e);
         }
     }
 
@@ -79,7 +81,7 @@ public class CartDAOImpl implements CartDAO {
             return Optional.ofNullable(cart);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error finding cart by ID: " + e.getMessage(), e);
+            throw new DAOException("Error finding cart by ID: " + e.getMessage(), e);
         }
     }
 
@@ -94,7 +96,7 @@ public class CartDAOImpl implements CartDAO {
             return query.uniqueResultOptional();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error finding cart by user ID: " + e.getMessage(), e);
+            throw new DAOException("Error finding cart by user ID: " + e.getMessage(), e);
         }
     }
 
@@ -109,7 +111,7 @@ public class CartDAOImpl implements CartDAO {
             return query.uniqueResultOptional();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error finding cart by session ID: " + e.getMessage(), e);
+            throw new DAOException("Error finding cart by session ID: " + e.getMessage(), e);
         }
     }
 
@@ -121,14 +123,11 @@ public class CartDAOImpl implements CartDAO {
             
             // Check if the product already exists in the cart
             boolean productExists = false;
-            for (Cart.CartItem item : cart.getItems()) {
+            for (CartItem item : cart.getItems()) {
                 if (item.getProduct().getId().equals(product.getId())) {
                     // Update quantity
                     item.setQuantity(item.getQuantity() + quantity);
-                    // Calculate subtotal using BigDecimal for precision
-                    BigDecimal price = product.getPrice();
-                    BigDecimal subtotal = price.multiply(BigDecimal.valueOf(item.getQuantity()));
-                    item.setSubtotal(subtotal);
+                    item.setUpdatedAt(LocalDateTime.now());
                     productExists = true;
                     break;
                 }
@@ -136,13 +135,14 @@ public class CartDAOImpl implements CartDAO {
             
             // If product doesn't exist in cart, add it
             if (!productExists) {
-                Cart.CartItem newItem = new Cart.CartItem();
+                CartItem newItem = new CartItem();
+                newItem.setCart(cart);
                 newItem.setProduct(product);
                 newItem.setQuantity(quantity);
-                // Calculate subtotal using BigDecimal for precision
-                BigDecimal price = product.getPrice();
-                BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
-                newItem.setSubtotal(subtotal);
+                newItem.setPrice(product.getPrice());
+                LocalDateTime now = LocalDateTime.now();
+                newItem.setCreatedAt(now);
+                newItem.setUpdatedAt(now);
                 cart.getItems().add(newItem);
             }
             
@@ -160,7 +160,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error adding item to cart: " + e.getMessage(), e);
+            throw new DAOException("Error adding item to cart: " + e.getMessage(), e);
         }
     }
 
@@ -171,18 +171,15 @@ public class CartDAOImpl implements CartDAO {
             transaction = session.beginTransaction();
             
             // Find the item in the cart
-            for (Cart.CartItem item : cart.getItems()) {
+            for (CartItem item : cart.getItems()) {
                 if (item.getProduct().getId().equals(productId)) {
                     if (quantity <= 0) {
                         // If quantity is 0 or negative, remove the item
                         return removeItem(cart, productId);
                     } else {
-                        // Update quantity and subtotal
+                        // Update quantity and timestamp
                         item.setQuantity(quantity);
-                        // Calculate subtotal using BigDecimal for precision
-                        BigDecimal price = item.getProduct().getPrice();
-                        BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
-                        item.setSubtotal(subtotal);
+                        item.setUpdatedAt(LocalDateTime.now());
                         break;
                     }
                 }
@@ -202,7 +199,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error updating item quantity in cart: " + e.getMessage(), e);
+            throw new DAOException("Error updating item quantity in cart: " + e.getMessage(), e);
         }
     }
 
@@ -229,7 +226,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error removing item from cart: " + e.getMessage(), e);
+            throw new DAOException("Error removing item from cart: " + e.getMessage(), e);
         }
     }
 
@@ -256,7 +253,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error clearing cart items: " + e.getMessage(), e);
+            throw new DAOException("Error clearing cart items: " + e.getMessage(), e);
         }
     }
 
@@ -269,67 +266,19 @@ public class CartDAOImpl implements CartDAO {
             // Find guest cart by session ID
             Optional<Cart> guestCartOpt = findBySessionId(sessionId);
             if (guestCartOpt.isEmpty()) {
-                // No guest cart found, nothing to merge
                 transaction.commit();
-                return findByUserId(user.getId()).orElseGet(() -> {
-                    // Create a new cart for the user if none exists
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return save(newCart);
-                });
+                return findOrCreateUserCart(user);
             }
             
             Cart guestCart = guestCartOpt.get();
-            
-            // Find or create user cart
             Optional<Cart> userCartOpt = findByUserId(user.getId());
-            Cart userCart;
+            Cart userCart = mergeOrConvertCart(guestCart, userCartOpt, user);
             
-            if (userCartOpt.isPresent()) {
-                // User already has a cart, merge items
-                userCart = userCartOpt.get();
-                
-                // Add guest cart items to user cart
-                for (Cart.CartItem guestItem : guestCart.getItems()) {
-                    boolean itemExists = false;
-                    
-                    // Check if product already exists in user cart
-                    for (Cart.CartItem userItem : userCart.getItems()) {
-                        if (userItem.getProduct().getId().equals(guestItem.getProduct().getId())) {
-                            // Update quantity
-                            userItem.setQuantity(userItem.getQuantity() + guestItem.getQuantity());
-                            BigDecimal price = userItem.getProduct().getPrice();
-                            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(userItem.getQuantity()));
-                            userItem.setSubtotal(subtotal);
-                            itemExists = true;
-                            break;
-                        }
-                    }
-                    
-                    // If product doesn't exist in user cart, add it
-                    if (!itemExists) {
-                        Cart.CartItem newItem = new Cart.CartItem();
-                        newItem.setProduct(guestItem.getProduct());
-                        newItem.setQuantity(guestItem.getQuantity());
-                        newItem.setSubtotal(guestItem.getSubtotal());
-                        userCart.getItems().add(newItem);
-                    }
-                }
-            } else {
-                // User doesn't have a cart, convert guest cart to user cart
-                userCart = guestCart;
-                userCart.setUser(user);
-                userCart.setSessionId(null); // Clear session ID
-            }
-            
-            // Update cart total and timestamp
+            // Update cart and cleanup
             userCart.setUpdatedAt(LocalDateTime.now());
             updateCartTotal(userCart);
-            
-            // Update the user cart
             session.merge(userCart);
             
-            // Delete the guest cart if it's different from the user cart
             if (guestCart != userCart) {
                 session.remove(guestCart);
             }
@@ -341,7 +290,57 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error merging guest cart with user cart: " + e.getMessage(), e);
+            throw new DAOException("Error merging guest cart with user cart: " + e.getMessage(), e);
+        }
+    }
+    
+    private Cart findOrCreateUserCart(User user) {
+        return findByUserId(user.getId()).orElseGet(() -> {
+            Cart newCart = new Cart();
+            newCart.setUser(user);
+            return save(newCart);
+        });
+    }
+    
+    private Cart mergeOrConvertCart(Cart guestCart, Optional<Cart> userCartOpt, User user) {
+        if (userCartOpt.isPresent()) {
+            Cart userCart = userCartOpt.get();
+            mergeGuestItemsIntoUserCart(guestCart, userCart);
+            return userCart;
+        } else {
+            // Convert guest cart to user cart
+            guestCart.setUser(user);
+            guestCart.setSessionId(null);
+            return guestCart;
+        }
+    }
+    
+    private void mergeGuestItemsIntoUserCart(Cart guestCart, Cart userCart) {
+        for (CartItem guestItem : guestCart.getItems()) {
+            boolean itemExists = false;
+            
+            // Check if product already exists in user cart
+            for (CartItem userItem : userCart.getItems()) {
+                if (userItem.getProduct().getId().equals(guestItem.getProduct().getId())) {
+                    userItem.setQuantity(userItem.getQuantity() + guestItem.getQuantity());
+                    userItem.setUpdatedAt(LocalDateTime.now());
+                    itemExists = true;
+                    break;
+                }
+            }
+            
+            // If product doesn't exist in user cart, add it
+            if (!itemExists) {
+                CartItem newItem = new CartItem();
+                newItem.setCart(userCart);
+                newItem.setProduct(guestItem.getProduct());
+                newItem.setQuantity(guestItem.getQuantity());
+                newItem.setPrice(guestItem.getPrice());
+                LocalDateTime now = LocalDateTime.now();
+                newItem.setCreatedAt(now);
+                newItem.setUpdatedAt(now);
+                userCart.getItems().add(newItem);
+            }
         }
     }
 
@@ -364,7 +363,7 @@ public class CartDAOImpl implements CartDAO {
                 transaction.rollback();
             }
             e.printStackTrace();
-            throw new RuntimeException("Error deleting cart: " + e.getMessage(), e);
+            throw new DAOException("Error deleting cart: " + e.getMessage(), e);
         }
     }
     
@@ -373,10 +372,13 @@ public class CartDAOImpl implements CartDAO {
      *
      * @param cart The cart to update
      */
+    /**
+     * Helper method to update the cart total based on item subtotals.
+     *
+     * @param cart The cart to update
+     */
     private void updateCartTotal(Cart cart) {
-        BigDecimal total = cart.getItems().stream()
-                .map(Cart.CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = cart.calculateTotal();
         cart.setTotal(total);
     }
 }

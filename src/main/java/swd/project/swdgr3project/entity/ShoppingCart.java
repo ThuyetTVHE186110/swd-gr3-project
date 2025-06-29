@@ -88,6 +88,46 @@ public class ShoppingCart {
         return items.isEmpty();
     }
 
+    /**
+     * Gets the total number of items in the cart.
+     * @return total number of items
+     */
+    public int getTotalItems() {
+        return items.stream().mapToInt(CartItem::getQuantity).sum();
+    }
+
+    /**
+     * Gets the total amount (same as finalTotal).
+     * @return total amount
+     */
+    public BigDecimal getTotalAmount() {
+        return this.finalTotal;
+    }
+
+    /**
+     * Updates the totals (calls recalculateTotals).
+     */
+    public void updateTotal() {
+        recalculateTotals();
+    }
+
+    /**
+     * Removes an item from the cart by product ID.
+     * @param productId the product ID to remove
+     */
+    public void removeItem(Long productId) {
+        items.removeIf(item -> item.getProduct().getId().equals(productId));
+        recalculateTotals();
+    }
+
+    /**
+     * Clears all items from the cart.
+     */
+    public void clear() {
+        items.clear();
+        recalculateTotals();
+    }
+
     @Override
     public String toString() {
         return "ShoppingCart{" +

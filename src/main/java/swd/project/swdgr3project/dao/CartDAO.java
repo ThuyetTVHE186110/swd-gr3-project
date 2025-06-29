@@ -1,8 +1,8 @@
 package swd.project.swdgr3project.dao;
 
-import swd.project.swdgr3project.model.entity.Cart;
-import swd.project.swdgr3project.model.entity.Product;
-import swd.project.swdgr3project.model.entity.User;
+import swd.project.swdgr3project.entity.Cart;
+import swd.project.swdgr3project.entity.Product;
+import swd.project.swdgr3project.entity.User;
 
 import java.util.Optional;
 

@@ -67,7 +67,16 @@ public class ProductDAOImpl implements ProductDAO {
     @Override
     public Optional<Product> findById(Long id) {
         try (Session session = HibernateUtils.getSessionFactory().openSession()) {
-            Product product = session.get(Product.class, id);
+            // Use HQL with explicit join fetch to ensure additional images are loaded
+            String hql = "SELECT p FROM Product p " +
+                        "LEFT JOIN FETCH p.additionalImages " +
+                        "LEFT JOIN FETCH p.category " +
+                        "WHERE p.id = :id";
+            
+            Query<Product> query = session.createQuery(hql, Product.class);
+            query.setParameter("id", id);
+            
+            Product product = query.uniqueResult();
             return Optional.ofNullable(product);
         } catch (Exception e) {
             e.printStackTrace();

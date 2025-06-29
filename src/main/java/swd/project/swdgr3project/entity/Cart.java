@@ -36,6 +36,9 @@ public class Cart {
     @EqualsAndHashCode.Exclude
     private List<CartItem> items = new ArrayList<>();
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal total = BigDecimal.ZERO;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

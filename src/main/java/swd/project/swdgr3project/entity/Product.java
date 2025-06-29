@@ -37,8 +37,8 @@ public class Product {
 
     private String imageUrl;
 
-    // Đối với một danh sách các chuỗi đơn giản, LAZY là mặc định và thường là tốt.
-    @ElementCollection(fetch = FetchType.LAZY)
+    // Changed to EAGER to avoid LazyInitializationException in JSP
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_additional_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     private List<String> additionalImages = new ArrayList<>();

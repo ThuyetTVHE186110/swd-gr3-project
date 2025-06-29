@@ -27,6 +27,39 @@ public class ProductDTO {
     private ProductCategoryDTO category;
     private boolean active;
 
+    // Helper method to get category name
+    public String getCategoryName() {
+        return category != null ? category.getName() : null;
+    }
+
+    // Backward compatibility methods
+    public int getStock() {
+        return this.stockQuantity;
+    }
+
+    public void setStock(int stock) {
+        this.stockQuantity = stock;
+    }
+
+    public String getImageUrl() {
+        return this.mainImageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.mainImageUrl = imageUrl;
+    }
+
+    /**
+     * Helper method to set category by name (creates a simple category DTO).
+     */
+    public void setCategoryName(String categoryName) {
+        if (categoryName != null && !categoryName.trim().isEmpty()) {
+            ProductCategoryDTO categoryDTO = new ProductCategoryDTO();
+            categoryDTO.setName(categoryName.trim());
+            this.category = categoryDTO;
+        }
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -56,7 +89,16 @@ public class ProductDTO {
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
         dto.setStockQuantity(product.getStock());
-        dto.setImageUrls(product.getAdditionalImages());
+        
+        // With EAGER fetching, additional images should be safely accessible
+        List<String> additionalImages = product.getAdditionalImages();
+        if (additionalImages != null) {
+            // Create a new list to avoid any potential Hibernate proxy issues
+            dto.setImageUrls(new java.util.ArrayList<>(additionalImages));
+        } else {
+            dto.setImageUrls(new java.util.ArrayList<>());
+        }
+        
         dto.setMainImageUrl(product.getImageUrl());
         dto.setCategory(ProductCategoryDTO.fromEntity(product.getCategory()));
         dto.setActive(product.isActive());
