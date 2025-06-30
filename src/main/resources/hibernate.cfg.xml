@@ -8,8 +8,8 @@
 
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
+        <!-- Trong file hibernate.cfg.xml -->
         <property name="hibernate.hbm2ddl.auto">update</property>
-
         <!-- Entity classes -->
         <mapping class="swd.project.swdgr3project.entity.User"/>
         <mapping class="swd.project.swdgr3project.entity.ProductCategory"/>
